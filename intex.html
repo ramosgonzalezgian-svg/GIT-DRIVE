@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Escolar e Inasistencias</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-graduation-cap mr-2"></i>EduControl Pro</h1>
+            <div class="flex space-x-4">
+                <button onclick="switchTab('estudiantes')" id="btn-estudiantes" class="px-4 py-2 rounded bg-blue-700 font-semibold transition">Estudiantes</button>
+                <button onclick="switchTab('asistencia')" id="btn-asistencia" class="px-4 py-2 rounded hover:bg-blue-500 font-semibold transition">Asistencia & QR</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <div id="tab-estudiantes" class="tab-content active">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-700">Panel de Estudiantes</h2>
+                <button onclick="abrirFormularioEstudiante()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition flex items-center">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Registrar Estudiante
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <tr>
+                            <th class="py-3 px-6 text-left">DNI</th>
+                            <th class="py-3 px-6 text-left">Estudiante</th>
+                            <th class="py-3 px-6 text-center">Género</th>
+                            <th class="py-3 px-6 text-center">Edad</th>
+                            <th class="py-3 px-6 text-center">Teléfono</th>
+                            <th class="py-3 px-6 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-estudiantes-body" class="text-gray-600 text-sm font-light">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-asistencia" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold text-gray-700 mb-4"><i class="fa-solid fa-qrcode mr-2"></i>Escáner de Asistencia QR</h3>
+                    
+                    <div id="qr-reader" class="w-full bg-gray-200 rounded-lg mb-4 overflow-hidden" style="min-height: 250px;"></div>
+                    
+                    <div class="flex flex-col space-y-2">
+                        <button onclick="encenderCamara()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                            <i class="fa-solid fa-camera mr-2"></i> Activar Cámara
+                        </button>
+                        <button onclick="detenerCamara()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition">
+                            <i class="fa-solid fa-stop mr-2"></i> Apagar Cámara
+                        </button>
+                    </div>
+
+                    <hr class="my-6 border-gray-300">
+
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3"><i class="fa-solid fa-pen-to-square mr-2"></i>Registro Manual / Modificación</h3>
+                    <button onclick="abrirFormularioAsistencia()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded transition">
+                        Registrar/Editar Asistencia
+                    </button>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-700" id="calendario-titulo">Calendario</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="cambiarMes(-1)" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button onclick="cambiarMes(1)" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-2 text-center font-bold text-gray-500 text-sm mb-2">
+                        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                    </div>
+                    <div id="calendario-dias" class="grid grid-cols-7 gap-2"></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- BASE DE DATOS INICIAL (20 Estudiantes) ---
+        let estudiantes = [
+            { dni: "74839201", nombres: "Alejandro Luis", apellidos: "Flores Quispe", genero: "Masculino", edad: 20, telefono: "981234567" },
+            { dni: "45920183", nombres: "María Fernanda", apellidos: "Sánches Huamán", genero: "Femenino", edad: 22, telefono: "954871236" },
+            { dni: "71029384", nombres: "Carlos Alberto", apellidos: "Mendoza Rojas", genero: "Masculino", edad: 19, telefono: "921456789" },
+            { dni: "48392012", nombres: "Ana Lucía", apellidos: "Espinoza Mamani", genero: "Femenino", edad: 21, telefono: "963258741" },
+            { dni: "76543210", nombres: "Mateo Sebastian", apellidos: "Ramos Castro", genero: "Masculino", edad: 23, telefono: "974123654" },
+            { dni: "60192837", nombres: "Camila Belén", apellidos: "Benitez Vargas", genero: "Femenino", edad: 18, telefono: "912345678" },
+            { dni: "72839405", nombres: "Juan Diego", apellidos: "Castillo Gutiérrez", genero: "Masculino", edad: 24, telefono: "998765432" },
+            { dni: "41029384", nombres: "Valeria Sofía", apellidos: "Diaz Morales", genero: "Femenino", edad: 20, telefono: "933445566" },
+            { dni: "75940321", nombres: "Lucas Gabriel", apellidos: "Salazar Herrera", genero: "Masculino", edad: 22, telefono: "951753852" },
+            { dni: "47382910", nombres: "Andrea Carolina", apellidos: "Cruz Palomino", genero: "Femenino", edad: 19, telefono: "962841357" },
+            { dni: "73829104", nombres: "Diego Alonso", apellidos: "Flores Torres", genero: "Masculino", edad: 21, telefono: "987654321" },
+            { dni: "46281937", nombres: "Claudia Beatriz", bandwidth: "Res Ramirez", genero: "Femenino", edad: 25, telefono: "944556677" },
+            { dni: "70192834", nombres: "Nicolas André", apellidos: "Villanueva Ruiz", genero: "Masculino", edad: 20, telefono: "911223344" },
+            { dni: "49382716", nombres: "Daniela Alejandra", apellidos: "Aguilar Silva", genero: "Femenino", edad: 18, telefono: "966778899" },
+            { dni: "72635481", nombres: "Matias Gonzalo", apellidos: "Guerrero Cordero", genero: "Masculino", edad: 23, telefono: "955667788" },
+            { dni: "44321098", nombres: "Martina Paz", apellidos: "Delgado Farfán", genero: "Femenino", edad: 22, telefono: "932145789" },
+            { dni: "71829304", nombres: "Sebastian Omar", apellidos: "Paredes Cárdenas", genero: "Masculino", edad: 21, telefono: "989541236" },
+            { dni: "42938102", nombres: "Natalia Inés", apellidos: "Sotomayor Vega", genero: "Femenino", edad: 19, telefono: "971364258" },
+            { dni: "76019283", nombres: "Franco David", apellidos: "Medina Alva", genero: "Masculino", edad: 24, telefono: "941852963" },
+            { dni: "45102938", nombres: "Elena Beatriz", apellidos: "Fuentes Rios", genero: "Femenino", edad: 20, telefono: "922558741" }
+        ];
+
+        // --- ESTRUCTURA ASISTENCIAS ---
+        // Clave: "YYYY-MM-DD", Valor: { "DNI_ESTUDIANTE": "Presente" | "Tarde" | "Falta" }
+        let asistencias = {
+            "2026-06-01": { "74839201": "Presente", "45920183": "Tarde", "71029384": "Falta" }
+        };
+
+        // Variables de estado
+        let fechaActualCalendario = new Date();
+        let html5QrcodeScanner = null;
+
+        // Al iniciar la web
+        document.addEventListener("DOMContentLoaded", () => {
+            renderTablaEstudiantes();
+            renderCalendario();
+        });
+
+        // --- SISTEMA DE NAVEGACIÓN (TABS) ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            document.getElementById('btn-estudiantes').className = tabName === 'estudiantes' ? 'px-4 py-2 rounded bg-blue-700 font-semibold transition' : 'px-4 py-2 rounded hover:bg-blue-500 font-semibold transition';
+            document.getElementById('btn-asistencia').className = tabName === 'asistencia' ? 'px-4 py-2 rounded bg-blue-700 font-semibold transition' : 'px-4 py-2 rounded hover:bg-blue-500 font-semibold transition';
+        }
+
+        // --- CRUD ESTUDIANTES ---
+        function renderTablaEstudiantes() {
+            const tbody = document.getElementById('tabla-estudiantes-body');
+            tbody.innerHTML = '';
+            estudiantes.forEach((est, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-200 hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="py-3 px-6 text-left font-medium">${est.dni}</td>
+                    <td class="py-3 px-6 text-left">${est.apellidos}, ${est.nombres}</td>
+                    <td class="py-3 px-6 text-center">${est.genero}</td>
+                    <td class="py-3 px-6 text-center">${est.edad}</td>
+                    <td class="py-3 px-6 text-center">${est.telefono}</td>
+                    <td class="py-3 px-6 text-center flex justify-center space-x-2">
+                        <button onclick="abrirFormularioEstudiante('${est.dni}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs transition"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="eliminarEstudiante('${est.dni}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function abrirFormularioEstudiante(dniEditar = null) {
+            let est = { dni: '', nombres: '', apellidos: '', genero: 'Masculino', edad: '', telefono: '' };
+            if (dniEditar) {
+                est = estudiantes.find(e => e.dni === dniEditar);
+            }
+
+            const { value: formValues } = await Swal.fire({
+                title: dniEditar ? 'Editar Estudiante' : 'Registrar Nuevo Estudiante',
+                html: `
+                    <input id="swal-dni" class="swal2-input" placeholder="DNI (8 dígitos)" value="${est.dni}" ${dniEditar ? 'disabled' : ''}>
+                    <input id="swal-nombres" class="swal2-input" placeholder="Nombres" value="${est.nombres}">
+                    <input id="swal-apellidos" class="swal2-input" placeholder="Apellidos" value="${est.apellidos}">
+                    <select id="swal-genero" class="swal2-input">
+                        <option value="Masculino" ${est.genero === 'Masculino' ? 'selected' : ''}>Masculino</option>
+                        <option value="Femenino" ${est.genero === 'Femenino' ? 'selected' : ''}>Femenino</option>
+                    </select>
+                    <input id="swal-edad" type="number" class="swal2-input" placeholder="Edad" value="${est.edad}">
+                    <input id="swal-telefono" class="swal2-input" placeholder="Teléfono" value="${est.telefono}">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const dni = document.getElementById('swal-dni').value.trim();
+                    const nombres = document.getElementById('swal-nombres').value.trim();
+                    const apellidos = document.getElementById('swal-apellidos').value.trim();
+                    const genero = document.getElementById('swal-genero').value;
+                    const edad = document.getElementById('swal-edad').value;
+                    const telefono = document.getElementById('swal-telefono').value.trim();
+
+                    if (!dni || !nombres || !apellidos || !edad || !telefono) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios');
+                        return false;
+                    }
+                    if (dni.length !== 8 || isNaN(dni)) {
+                        Swal.showValidationMessage('El DNI debe tener 8 dígitos numéricos');
+                        return false;
+                    }
+                    if (!dniEditar && estudiantes.some(e => e.dni === dni)) {
+                        Swal.showValidationMessage('Este DNI ya se encuentra registrado');
+                        return false;
+                    }
+
+                    return { dni, nombres, apellidos, genero, edad: parseInt(edad), telefono };
+                }
+            });
+
+            if (formValues) {
+                if (dniEditar) {
+                    const index = estudiantes.findIndex(e => e.dni === dniEditar);
+                    estudiantes[index] = { ...formValues, dni: dniEditar }; // Mantiene DNI original
+                    Swal.fire('¡Actualizado!', 'Datos modificados correctamente', 'success');
+                } else {
+                    estudiantes.push(formValues);
+                    Swal.fire('¡Registrado!', 'Estudiante añadido exitosamente', 'success');
+                }
+                renderTablaEstudiantes();
+            }
+        }
+
+        function eliminarEstudiante(dni) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Se eliminarán los registros del estudiante de manera permanente.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    estudiantes = estudiantes.filter(e => e.dni !== dni);
+                    renderTablaEstudiantes();
+                    Swal.fire('Eliminado', 'El estudiante ha sido removido del sistema.', 'success');
+                }
+            });
+        }
+
+
+        // --- SISTEMA DE CALENDARIO ---
+        function renderCalendario() {
+            const diasContenedor = document.getElementById('calendario-dias');
+            const titulo = document.getElementById('calendario-titulo');
+            
+            diasContenedor.innerHTML = '';
+            
+            const año = fechaActualCalendario.getFullYear();
+            const mes = fechaActualCalendario.getMonth();
+            
+            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            titulo.innerText = `${nombresMeses[mes]} de ${año}`;
+            
+            const primerDiaMes = new Date(año, mes, 1).getDay();
+            const totalDiasMes = new Date(año, mes + 1, 0).getDate();
+            
+            // Espacios en blanco para el desfase del primer día de la semana
+            for (let i = 0; i < primerDiaMes; i++) {
+                const divVacio = document.createElement('div');
+                diasContenedor.appendChild(divVacio);
+            }
+            
+            // Renderizar los días
+            for (let dia = 1; dia <= totalDiasMes; dia++) {
+                const fechaStr = `${año}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                
+                const btnDia = document.createElement('button');
+                btnDia.className = "h-14 border border-gray-200 rounded p-1 flex flex-col justify-between hover:bg-blue-50 transition text-left";
+                btnDia.onclick = () => verAsistenciasFecha(fechaStr);
+                
+                // Número del día
+                const numDia = document.createElement('span');
+                numDia.className = "text-xs font-bold text-gray-700";
+                numDia.innerText = dia;
+                btnDia.appendChild(numDia);
+                
+                // Mini resumen visual de asistencias en el día
+                if (asistencias[fechaStr]) {
+                    const totalReg = Object.keys(asistencias[fechaStr]).length;
+                    const miniIndicador = document.createElement('span');
+                    miniIndicador.className = "text-[10px] bg-blue-100 text-blue-700 rounded px-1 font-semibold self-end";
+                    miniIndicador.innerText = `${totalReg} Reg.`;
+                    btnDia.appendChild(miniIndicador);
+                }
+                
+                diasContenedor.appendChild(btnDia);
+            }
+        }
+
+        function cambiarMes(direccion) {
+            fechaActualCalendario.setMonth(fechaActualCalendario.getMonth() + direccion);
+            renderCalendario();
+        }
+
+        // Mostrar listado de asistencias de un día específico
+        function verAsistenciasFecha(fechaStr) {
+            const regDia = asistencias[fechaStr] || {};
+            let htmlLista = `<div class="max-h-60 overflow-y-auto text-left">`;
+            
+            if (Object.keys(regDia).length === 0) {
+                htmlLista += `<p class="text-gray-500 text-center">No hay asistencias registradas para esta fecha.</p>`;
+            } else {
+                htmlLista += `<table class="w-full text-sm"><thead><tr class="border-b font-bold"><td>Estudiante</td><td>Estado</td></tr></thead><tbody>`;
+                for (const [dni, estado] of Object.entries(regDia)) {
+                    const est = estudiantes.find(e => e.dni === dni);
+                    const nombreCompleto = est ? `${est.apellidos}, ${est.nombres}` : `DNI: ${dni} (Retirado)`;
+                    let color = 'text-green-600';
+                    if(estado === 'Tarde') color = 'text-yellow-600';
+                    if(estado === 'Falta') color = 'text-red-600';
+                    
+                    htmlLista += `<tr class="border-b"><td class="py-1">${nombreCompleto}</td><td class="font-bold ${color}">${estado}</td></tr>`;
+                }
+                htmlLista += `</tbody></table>`;
+            }
+            htmlLista += `</div>`;
+
+            Swal.fire({
+                title: `Asistencias del ${fechaStr}`,
+                html: htmlLista,
+                showCancelButton: true,
+                confirmButtonText: 'Modificar/Agregar',
+                cancelButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    abrirFormularioAsistencia(fechaStr);
+                }
+            });
+        }
+
+
+        // --- FORMULARIO DE ASISTENCIA MANUAL ---
+        async function abrirFormularioAsistencia(fechaPorDefecto = '') {
+            // Opciones de estudiantes para el Select
+            let opcionesEstudiantes = estudiantes.map(e => `<option value="${e.dni}">${e.apellidos}, ${e.nombres} (${e.dni})</option>`).join('');
+            
+            const { value: formValues } = await Swal.fire({
+                title: 'Control de Asistencia Manual',
+                html: `
+                    <div class="text-left mb-2 text-sm text-gray-600">Fecha:</div>
+                    <input id="asist-fecha" type="date" class="swal2-input !mt-0" value="${fechaPorDefecto || new Date().toISOString().split('T')[0]}">
+                    
+                    <div class="text-left mb-2 text-sm text-gray-600">Seleccionar Estudiante:</div>
+                    <select id="asist-estudiante" class="swal2-input !mt-0">${opcionesEstudiantes}</select>
+                    
+                    <div class="text-left mb-2 text-sm text-gray-600">Condición:</div>
+                    <select id="asist-estado" class="swal2-input !mt-0">
+                        <option value="Presente">Presente</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Falta">Falta</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Registrar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    return {
+                        fecha: document.getElementById('asist-fecha').value,
+                        dni: document.getElementById('asist-estudiante').value,
+                        estado: document.getElementById('asist-estado').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                registrarAsistenciaEnBD(formValues.fecha, formValues.dni, formValues.estado);
+            }
+        }
+
+        function registrarAsistenciaEnBD(fecha, dni, estado) {
+            if (!asistencias[fecha]) {
+                asistencias[fecha] = {};
+            }
+            asistencias[fecha][dni] = estado;
+            
+            Swal.fire('¡Éxito!', `Se guardó '${estado}' para el estudiante asignado.`, 'success');
+            renderCalendario();
+        }
+
+
+        // --- LECTOR DE CÁMARA Y CÓDIGOS QR ---
+        function encenderCamara() {
+            // Se asume que el código QR contiene exactamente el número de DNI del alumno
+            html5QrcodeScanner = new Html5Qrcode("qr-reader");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Prioriza la cámara trasera
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    // Acción al leer exitosamente un código QR
+                    procesarLecturaQR(decodedText.trim());
+                },
+                (errorMessage) => {
+                    // Error de escaneo continuo (silenciado por flujo de la cámara)
+                }
+            ).catch((err) => {
+                Swal.fire('Error de cámara', 'No se pudo acceder al hardware de video o faltan permisos.', 'error');
+            });
+        }
+
+        function detenerCamara() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('qr-reader').innerHTML = '';
+                }).catch(err => console.error("Error al apagar cámara", err));
+            }
+        }
+
+        function procesarLecturaQR(dniDetectado) {
+            // Validamos que el QR corresponda a un estudiante actual
+            const alumno = estudiantes.find(e => e.dni === dniDetectado);
+            
+            if (!alumno) {
+                Swal.fire('Código Desconocido', `El DNI escaneado (${dniDetectado}) no pertenece a ningún estudiante registrado.`, 'warning');
+                return;
+            }
+
+            // Si el alumno existe, detenemos temporalmente el scanner para interactuar con SweetAlert
+            detenerCamara();
+
+            const hoy = new Date().toISOString().split('T')[0];
+
+            Swal.fire({
+                title: 'Estudiante Detectado',
+                text: `¿Qué estado desea asignar a ${alumno.nombres} ${alumno.apellidos} para hoy?`,
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Presente',
+                denyButtonText: 'Tarde',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    registrarAsistenciaEnBD(hoy, dniDetectado, 'Presente');
+                } else if (result.isDenied) {
+                    registrarAsistenciaEnBD(hoy, dniDetectado, 'Tarde');
+                }
+                
+                // Volver a activar la cámara tras registrar
+                encenderCamara();
+            });
+        }
+    </script>
+</body>
+</html>
