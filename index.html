@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiservicios Alfre - Almacén Inteligente</title>
+    <title>Control de Inventario - Almacén</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -19,20 +19,14 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+    <nav class="bg-slate-900 border-b border-slate-800 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
-                    <i data-lucide="warehouse" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white">MULTISERVICIOS ALFRE</h1>
-                    <p class="text-xs text-slate-400">Sistema Automatizado de Control de Almacén</p>
-                </div>
-            </div>
-            <div class="flex gap-2 w-full sm:w-auto">
-                <button onclick="exportarBackup()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i data-lucide="download" class="w-4 h-4"></i> Exportar Datos (.js)
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="boxes" class="text-indigo-400"></i> MULTISERVICIOS ALFRE - Sistema de Almacén
+            </h1>
+            <div class="flex gap-3">
+                <button onclick="exportarBackup()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-indigo-600/20 cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i> Exportar Backup (.js)
                 </button>
             </div>
         </div>
@@ -41,327 +35,238 @@
     <main class="max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1">
         
         <div class="lg:col-span-1 space-y-6">
-            
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-400">
-                    <i data-lucide="dollar-sign" class="w-20 h-20"></i>
-                </div>
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total General Almacén</h2>
-                <p class="text-3xl font-black text-emerald-400 tracking-tight" id="totalGeneral">S/. 62,488.00</p>
-                
-                <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Subtotal Abarrotes:</span>
-                        <span class="font-bold text-slate-200" id="subtotalAbarrotes">S/. 0.00</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Subtotal Limpieza:</span>
-                        <span class="font-bold text-slate-200" id="subtotalLimpieza">S/. 0.00</span>
-                    </div>
-                    <div class="flex justify-between pt-1 border-t border-dashed border-slate-800">
-                        <span class="text-slate-400">Items Totales:</span>
-                        <span class="font-bold text-indigo-400" id="itemsCount">0</span>
-                    </div>
-                </div>
-            </div>
-
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col items-center">
-                <h2 class="text-sm font-bold mb-3 flex items-center gap-2 text-indigo-400 w-full">
-                    <i data-lucide="qr-code" class="w-4 h-4"></i> Localizador por QR / Código
+                <h2 class="text-md font-semibold mb-3 flex items-center gap-2 text-indigo-400 w-full">
+                    <i data-lucide="qr-code"></i> Escáner de Productos
                 </h2>
                 <div class="relative w-full aspect-square bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
                     <div id="reader" class="w-full h-full object-cover"></div>
                     <div id="placeholder-camara" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-slate-950 z-10">
-                        <i data-lucide="video-off" class="w-8 h-8 text-slate-700 mb-2"></i>
-                        <p class="text-xs text-slate-400">Cámara Desactivada</p>
+                        <i data-lucide="video-off" class="w-8 h-8 text-slate-600 mb-2"></i>
+                        <p class="text-xs text-slate-400">Cámara Apagada</p>
                     </div>
                 </div>
-                <button id="btn-camara" onclick="toggleCamara()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-xl text-xs font-bold tracking-wider uppercase transition shadow-md shadow-indigo-600/10 flex items-center justify-center gap-2 cursor-pointer border border-indigo-500/40">
-                    <i data-lucide="camera" class="w-4 h-4"></i> <span>Encender Cámara</span>
+                <button id="btn-camara" onclick="toggleCamara()" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer border border-slate-700">
+                    <i data-lucide="camera" class="w-4 h-4"></i> <span>Activar Lector</span>
                 </button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-md font-semibold mb-4 flex items-center gap-2 text-emerald-400">
+                    <i data-lucide="wallet"></i> Balance Total
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider">Valor de Inventario</p>
+                        <p class="text-3xl font-extrabold text-white mt-1" id="totalInventario">S/. 0.00</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
+                        <span>Items registrados:</span>
+                        <span class="font-bold text-slate-200" id="cantidadItems">0</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="lg:col-span-3 space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-lg font-bold text-white">Fichas de Inventario</h2>
-                        <p class="text-xs text-slate-400">Haz clic en los botones de acción para editar cantidades, precios o detalles.</p>
+                        <h2 class="text-lg font-bold text-white">Listado de Artículos</h2>
+                        <p class="text-xs text-slate-400">Visualiza, añade y modifica los productos del almacén.</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="crearProductoForm()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition flex items-center gap-1.5 cursor-pointer">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Item
-                        </button>
-                    </div>
+                    <button onclick="crearProductoForm()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2 cursor-pointer self-start sm:self-auto">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Añadir Producto
+                    </button>
                 </div>
 
-                <div class="overflow-x-auto rounded-xl border border-slate-800 max-h-[600px] overflow-y-auto">
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
                     <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-900 z-20 shadow">
-                            <tr class="bg-slate-950 border-b border-slate-800 text-[11px] font-bold uppercase text-slate-400 tracking-wider">
-                                <th class="p-3">Código</th>
-                                <th class="p-3">Categoría</th>
-                                <th class="p-3">Descripción</th>
-                                <th class="p-3 text-center">U.M.</th>
-                                <th class="p-3 font-mono">Caducidad</th>
-                                <th class="p-3 text-right">Cant.</th>
-                                <th class="p-3 text-right">Precio</th>
-                                <th class="p-3 text-right">Total</th>
-                                <th class="p-3 text-center">Acciones</th>
+                        <thead>
+                            <tr class="bg-slate-950/60 border-b border-slate-800 text-xs font-semibold uppercase text-slate-400 tracking-wider">
+                                <th class="p-3.5">Código / QR</th>
+                                <th class="p-3.5">Descripción</th>
+                                <th class="p-3.5">U.M.</th>
+                                <th class="p-3.5">Caducidad</th>
+                                <th class="p-3.5 text-right">Cant.</th>
+                                <th class="p-3.5 text-right">Precio</th>
+                                <th class="p-3.5 text-right">Total</th>
+                                <th class="p-3.5 text-center">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaProductos" class="divide-y divide-slate-800/60 text-xs text-slate-300">
+                        <tbody id="tablaProductos" class="divide-y divide-slate-800 text-sm text-slate-300">
                             </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     </main>
 
     <script>
-        // BASE DE DATOS ESTRUCTURADA AL 100% DESDE TU CSV
+        // 1. BASE DE DATOS INICIAL EXTRACTADA DE TU EXCEL
         let inventario = [
-            // --- ABARROTES ---
-            { codigo: "001", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ X 49 KILOS - TONDERITO", caducidad: "2027-12-01", cantidad: 70, precio: 198.00 },
-            { codigo: "002", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ TONDERITO X 25 KG", caducidad: "2027-02-18", cantidad: 62, precio: 99.00 },
-            { codigo: "003", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ TONDERITO X 10 KG", caducidad: "", cantidad: 19, precio: 42.00 },
-            { codigo: "004", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 5 KG", caducidad: "", cantidad: 10, precio: 24.00 },
-            { codigo: "005", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 10 KG", caducidad: "2026-10-01", cantidad: 8, precio: 48.00 },
-            { codigo: "006", categoria: "Abarrotes", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 50 KG", caducidad: "2026-08-01", cantidad: 21, precio: 215.00 },
-            { codigo: "007", categoria: "Abarrotes", unidad: "SACOS", descripcion: "AZUCAR RUBIA ANTIGUO X 50 KG - POMALCA", caducidad: "2027-02-18", cantidad: 16, precio: 125.00 },
-            { codigo: "008", categoria: "Abarrotes", unidad: "SACOS", descripcion: "AZUCAR RUBIA DOMESTICA X 50 KG - POMALCA", caducidad: "", cantidad: 0, precio: 125.00 },
-            { codigo: "008-B", categoria: "Abarrotes", unidad: "SACO", descripcion: "AZUCAR RUBIA DOMESTICA X 25 KG - POMALCA", caducidad: "2026-11-24", cantidad: 10, precio: 65.00 },
-            { codigo: "009", categoria: "Abarrotes", unidad: "PLANCHAS", descripcion: "LECHE EVAPORADA GRANDE GLORIA CELESTE 390G X 24 UNIDADES", caducidad: "2026-07-01", cantidad: 12, precio: 110.00 },
-            { codigo: "010", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "GALLETAS ANITA SODA CRACKER X 12 UNIDADES", caducidad: "2027-11-14", cantidad: 8, precio: 30.00 },
-            { codigo: "011", categoria: "Abarrotes", unidad: "SACO", descripcion: "SAL DE COCINA X 26 UNIDADES", caducidad: "2027-12-11", cantidad: 6, precio: 30.00 },
-            { codigo: "012", categoria: "Abarrotes", unidad: "SACO", descripcion: "SAL DE MESA X 26 UNIDADES", caducidad: "2026-09-28", cantidad: 4, precio: 30.00 },
-            { codigo: "013", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEO MACARRON PARA SOPA - DON MAXIMO", caducidad: "2028-02-25", cantidad: 10, precio: 24.00 },
-            { codigo: "014", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEO SURTIDO PARA SOPA - DON MAXIMO", caducidad: "2027-12-02", cantidad: 45, precio: 24.00 },
-            { codigo: "015", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEOS SPAGUETI X 10 KG - DON MAXIMO", caducidad: "2026-09-02", cantidad: 18, precio: 45.00 },
-            { codigo: "016", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEOS TALLARIN DE 10 KILOS - DON MAXIMO", caducidad: "2027-09-07", cantidad: 22, precio: 45.00 },
-            { codigo: "017", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEO SURTIDO PARA SOPA - VICTORIO", caducidad: "2027-12-07", cantidad: 9, precio: 30.00 },
-            { codigo: "018", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEOS SPAGUETI X 10 KG - VICTORIO", caducidad: "2026-12-07", cantidad: 11, precio: 45.00 },
-            { codigo: "019", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "FIDEOS SPAGUETI X 10 KG - ANITA", caducidad: "2026-09-02", cantidad: 5, precio: 40.00 },
-            { codigo: "020", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "ACEITE VEGETAL CAJA X 12 LITROS - CIL", caducidad: "2027-01-30", cantidad: 6, precio: 98.00 },
-            { codigo: "021", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ACEITE VEGETAL CAJA 2L X 6 UNIDADES - BELTRAN", caducidad: "2026-12-12", cantidad: 2, precio: 90.00 },
-            { codigo: "022", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ACEITE PRIMOR CLASICO 900ML X 12 UNIDADES", caducidad: "2026-06-28", cantidad: 8, precio: 110.00 },
-            { codigo: "023", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ACEITE PRIMOR PREMIUN 900ML X 12 UNIDADES", caducidad: "2026-08-16", cantidad: 1, precio: 115.00 },
-            { codigo: "024", categoria: "Abarrotes", unidad: "CAJA", descripcion: "ACEITE VEGETAL CAJA X 3 LITROS 6 UNIDADES - CIL", caducidad: "2028-02-16", cantidad: 2, precio: 160.00 },
-            { codigo: "025", categoria: "Abarrotes", unidad: "CAJA", descripcion: "ACEITE VEGETAL CAJA X 5 LITROS X 4 - BELTRAN", caducidad: "2028-02-17", cantidad: 4, precio: 180.00 },
-            { codigo: "026", categoria: "Abarrotes", unidad: "CAJA", descripcion: "ACEITE VEGETAL BALDE 18 LITROS - BELTRAN", caducidad: "2028-02-20", cantidad: 13, precio: 150.00 },
-            { codigo: "027", categoria: "Abarrotes", unidad: "CAJA", descripcion: "ACEITE VEGETAL BALDE 18 LITROS - MIRASOL", caducidad: "2027-07-20", cantidad: 5, precio: 150.00 },
-            { codigo: "028", categoria: "Abarrotes", unidad: "CAJA", descripcion: "DURAZNO EN MITADES ACONCAGUA 12 X 822G", caducidad: "2028-10-12", cantidad: 2, precio: 105.00 },
-            { codigo: "029", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ATUN FLORIDA FILETE DE ATUN", caducidad: "2029-07-17", cantidad: 20, precio: 248.00 },
-            { codigo: "030", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ATUN PRIMOR FILETE DE ATUN", caducidad: "2030-01-26", cantidad: 12, precio: 235.00 },
-            { codigo: "030-B", categoria: "Abarrotes", unidad: "CAJAS", descripcion: "ATUN PILARES FILETE DE ATUN", caducidad: "2026-10-15", cantidad: 8, precio: 236.00 },
-            { codigo: "031", categoria: "Abarrotes", unidad: "SACO", descripcion: "AVENA 3 OSITOS X 10 KG", caducidad: "2026-12-17", cantidad: 2, precio: 70.00 },
-            { codigo: "032", categoria: "Abarrotes", unidad: "SACO", descripcion: "AVENA 3 OSITOS X 5 KG", caducidad: "2026-08-01", cantidad: 3, precio: 35.00 },
-            { codigo: "033", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "AVENA 3 OSITOS X 24 UNIDADES", caducidad: "2026-10-02", cantidad: 9, precio: 20.00 },
-            { codigo: "034", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "AVENA 3 OSITO 900G", caducidad: "2027-10-27", cantidad: 5, precio: 9.00 },
-            { codigo: "035", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "GELATINA", caducidad: "", cantidad: 24, precio: 3.50 },
-            { codigo: "036", categoria: "Abarrotes", unidad: "KILOS", descripcion: "CANELA", caducidad: "", cantidad: 10, precio: 75.00 },
-            { codigo: "037", categoria: "Abarrotes", unidad: "KILOS", descripcion: "CLAVO", caducidad: "2026-06-20", cantidad: 12, precio: 70.00 },
-            { codigo: "038", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "COCOA WINTER'S POTE 180G", caducidad: "2027-10-29", cantidad: 17, precio: 15.00 },
-            { codigo: "039", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "ALTOMAYO CLASICO 170G", caducidad: "2027-03-01", cantidad: 16, precio: 30.00 },
-            { codigo: "040", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "ALTOMAYO GOURMET 170 VERDE G", caducidad: "2027-03-01", cantidad: 13, precio: 38.00 },
-            { codigo: "041", categoria: "Abarrotes", unidad: "PAQUETE", descripcion: "CHOCOLATE DE TAZA CUSCO", caducidad: "", cantidad: 6, precio: 70.00 },
-            { codigo: "039-B", categoria: "Abarrotes", unidad: "KILOS", descripcion: "COMINO", caducidad: "", cantidad: 3, precio: 15.00 },
-            { codigo: "040-B", categoria: "Abarrotes", unidad: "KILOS", descripcion: "PIMIENTA", caducidad: "", cantidad: 3, precio: 20.00 },
-            { codigo: "041-B", categoria: "Abarrotes", unidad: "KILOS", descripcion: "OREGANO MOLIDO", caducidad: "", cantidad: 4, precio: 18.00 },
-            { codigo: "042", categoria: "Abarrotes", unidad: "KILOS", descripcion: "AJI COLORADO", caducidad: "2027-05-01", cantidad: 2, precio: 32.00 },
-            { codigo: "043", categoria: "Abarrotes", unidad: "UNIDAD", descripcion: "MILO EN LATA 380 GRAMOS", caducidad: "2027-10-15", cantidad: 5, precio: 22.00 },
-            { codigo: "044", categoria: "Abarrotes", unidad: "SACO", descripcion: "HARINA", caducidad: "", cantidad: 2, precio: 118.00 },
-            { codigo: "045", categoria: "BOLSA", descripcion: "ARROZ X 1 KG", caducidad: "", cantidad: 20, precio: 5.00 },
-            { codigo: "046", categoria: "BOLSA", descripcion: "AZUCAR X 1 KG", caducidad: "2026-05-20", cantidad: 35, precio: 5.00 },
-            { codigo: "047", categoria: "CAJA", descripcion: "MANTEQUILLA GLORIA 180G X 24 UNIDADES", caducidad: "2026-05-17", cantidad: 1, precio: 288.00 },
-            { codigo: "048", categoria: "CAJA", descripcion: "MANTEQUILLA GLORIA 390G X 24 UNIDADES", caducidad: "", cantidad: 1, precio: 456.00 },
-            { codigo: "049", categoria: "SACO", descripcion: "ARROCILLO X 50", caducidad: "", cantidad: 3, precio: 125.00 },
-
-            // --- EQUIPOS DE LIMPIEZA ---
-            { codigo: "GJH", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "PAPEL ELITE X 40 UNIDADES MALETA", caducidad: "", cantidad: 18, precio: 26.00 },
-            { codigo: "L02", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "PAPEL ELITE X 24 UNIDADES MALETA", caducidad: "", cantidad: 6, precio: 36.00 },
-            { codigo: "L03", categoria: "Limpieza", unidad: "PAQUETE", descripcion: "PAPEL ELITE X 6 PAQ", caducidad: "", cantidad: 6, precio: 48.00 },
-            { codigo: "L05", categoria: "Limpieza", unidad: "CAJA", descripcion: "AYUDIN LIMON Y SAVILA 950G", caducidad: "", cantidad: 3, precio: 82.00 },
-            { codigo: "L06", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "DETERGENTE ORION 4KG", caducidad: "", cantidad: 12, precio: 30.00 },
-            { codigo: "L07", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "DETERGENTE OPAL ULTRA FLORAL 4 KG", caducidad: "", cantidad: 2, precio: 45.00 },
-            { codigo: "L09", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "DETERGENTE TROME ENCANTO FLORAL 130G", caducidad: "", cantidad: 6, precio: 50.00 },
-            { codigo: "L11", categoria: "Limpieza", unidad: "CAJAS", descripcion: "JABON AROMA", caducidad: "", cantidad: 25, precio: 34.00 },
-            { codigo: "L12", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "TACHO DE BASURA", caducidad: "", cantidad: 26, precio: 15.00 },
-            { codigo: "L14", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "PAPEL ROLLO NOVA", caducidad: "", cantidad: 4, precio: 36.00 },
-            { codigo: "L16", categoria: "Limpieza", unidad: "CAJA", descripcion: "JABON BOLIVAR", caducidad: "", cantidad: 9, precio: 117.00 },
-            { codigo: "L17", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "DETERGENTE BOLIVAR L 4 KG", caducidad: "", cantidad: 8, precio: 50.00 },
-            { codigo: "L18", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "DETERGENTE ACE L 4 KG", caducidad: "", cantidad: 8, precio: 55.00 },
-            { codigo: "L19", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "AYUDIN LIQUIDO 1 LITRO", caducidad: "", cantidad: 5, precio: 192.00 },
-            { codigo: "L20", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "FLORAL POET", caducidad: "", cantidad: 17, precio: 20.00 },
-            { codigo: "L21", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "LEJIA LIGURIA", caducidad: "", cantidad: 3, precio: 10.00 },
-            { codigo: "L23", categoria: "Limpieza", unidad: "UNIDAD", descripcion: "LEJIA CLOROX", caducidad: "", cantidad: 8, precio: 15.00 },
-            { codigo: "L24", categoria: "Limpieza", unidad: "CAJA", descripcion: "AYUDIN SAPOLIO 850G", caducidad: "", cantidad: 3, precio: 36.00 }
+            { codigo: "001", unidad: "SACO", descripcion: "ARROZ X 49 KILOS - TONDERITO", caducidad: "2027-12-01", cantidad: 70, precio: 198.00 },
+            { codigo: "002", unidad: "SACO", descripcion: "ARROZ TONDERITO X 25 KG", caducidad: "2027-02-18", cantidad: 62, precio: 99.00 },
+            { codigo: "003", unidad: "SACO", descripcion: "ARROZ TONDERITO X 10 KG", caducidad: "", cantidad: 19, precio: 42.00 },
+            { codigo: "004", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 5 KG", caducidad: "", cantidad: 10, precio: 24.00 },
+            { codigo: "005", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 10 KG", caducidad: "2026-10-01", cantidad: 8, precio: 48.00 },
+            { codigo: "006", unidad: "SACO", descripcion: "ARROZ MAS SABOR X 50 KG", caducidad: "2026-08-01", cantidad: 21, precio: 215.00 },
+            { codigo: "007", unidad: "SACOS", descripcion: "AZUCAR RUBIA ANTIGUO X 50 KG - POMALCA", caducidad: "2027-02-18", cantidad: 16, precio: 125.00 },
+            { codigo: "042", unidad: "KILOS", descripcion: "AJI COLORADO", caducidad: "2027-05-01", cantidad: 2, precio: 32.00 },
+            { codigo: "043", unidad: "UNIDAD", descripcion: "MILO EN LATA 380 GRAMOS", caducidad: "2027-10-15", cantidad: 5, precio: 22.00 },
+            { codigo: "044", unidad: "SACO", descripcion: "HARINA", caducidad: "", cantidad: 2, precio: 118.00 },
+            { codigo: "045", unidad: "BOLSA", descripcion: "ARROZ X 1 KG", caducidad: "", cantidad: 20, precio: 5.00 },
+            { codigo: "046", unidad: "BOLSA", descripcion: "AZUCAR X 1 KG", caducidad: "2026-05-20", cantidad: 35, precio: 5.00 },
+            { codigo: "047", unidad: "CAJA", descripcion: "MANTEQUILLA GLORIA 180G X 24 UNIDADES", caducidad: "2026-05-17", cantidad: 1, precio: 288.00 },
+            { codigo: "048", unidad: "CAJA", descripcion: "MANTEQUILLA GLORIA 390G X 24 UNIDADES", caducidad: "", cantidad: 1, precio: 456.00 },
+            { codigo: "049", unidad: "SACO", descripcion: "ARROCILLO X 50", caducidad: "", cantidad: 3, precio: 125.00 }
         ];
 
         let html5QrcodeScanner = null;
         let esEscaneando = false;
 
+        // Inicializador
         document.addEventListener("DOMContentLoaded", () => {
-            renderizarTodo();
+            renderizarInventario();
+            lucide.createIcons();
         });
 
-        // RE-CALCULO GENERAL Y RENDERIZADO DE TABLAS
-        function renderizarTodo() {
+        // 2. RENDERIZADO Y CÁLCULOS
+        function renderizarInventario() {
             const tbody = document.getElementById("tablaProductos");
             tbody.innerHTML = "";
+            let sumaTotal = 0;
 
-            let subAbarrotes = 0;
-            let subLimpieza = 0;
-
-            inventario.forEach(item => {
-                const totalItem = item.cantidad * item.precio;
-                
-                if (item.categoria === "Abarrotes") subAbarrotes += totalItem;
-                else subLimpieza += totalItem;
+            inventario.forEach(prod => {
+                const totalItem = prod.cantidad * prod.precio;
+                sumaTotal += totalItem;
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 border-b border-slate-800/60" id="row-${item.codigo}">
-                        <td class="p-3 font-mono font-bold text-indigo-400 text-[11px]">${item.codigo}</td>
-                        <td class="p-3">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.categoria === 'Abarrotes' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
-                                ${item.categoria}
-                            </span>
-                        </td>
-                        <td class="p-3 text-white font-medium">${item.descripcion}</td>
-                        <td class="p-3 text-center text-slate-400 font-semibold text-[11px]">${item.unidad}</td>
-                        <td class="p-3 font-mono text-slate-400">${item.caducidad || '—'}</td>
-                        <td class="p-3 text-right font-bold text-slate-100">${item.cantidad}</td>
-                        <td class="p-3 text-right text-slate-400">S/. ${item.precio.toFixed(2)}</td>
-                        <td class="p-3 text-right font-extrabold text-emerald-400">S/. ${totalItem.toFixed(2)}</td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="editarProductoForm('${item.codigo}')" class="text-indigo-400 hover:bg-indigo-500/10 p-1.5 rounded-lg transition inline-flex items-center cursor-pointer"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="eliminarProducto('${item.codigo}')" class="text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition inline-flex items-center cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <tr class="hover:bg-slate-800/30 transition border-b border-slate-800/50" id="prod-row-${prod.codigo}">
+                        <td class="p-3.5 font-mono text-xs font-semibold text-indigo-400">${prod.codigo}</td>
+                        <td class="p-3.5 font-medium text-white">${prod.descripcion}</td>
+                        <td class="p-3.5 text-xs text-slate-400">${prod.unidad}</td>
+                        <td class="p-3.5 text-xs font-mono ${prod.caducidad ? 'text-amber-400' : 'text-slate-600'}">${prod.caducidad || '—'}</td>
+                        <td class="p-3.5 text-right font-semibold">${prod.cantidad}</td>
+                        <td class="p-3.5 text-right text-slate-400">S/. ${prod.precio.toFixed(2)}</td>
+                        <td class="p-3.5 text-right font-bold text-emerald-400">S/. ${totalItem.toFixed(2)}</td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="editarProductoForm('${prod.codigo}')" class="text-indigo-400 hover:bg-indigo-500/10 p-1.5 rounded-lg transition inline-flex items-center cursor-pointer" title="Editar"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="eliminarProducto('${prod.codigo}')" class="text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition inline-flex items-center cursor-pointer" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </td>
                     </tr>
                 `;
             });
 
-            // Actualizar Balances Financieros
-            const totalG = subAbarrotes + subLimpieza;
-            document.getElementById("totalGeneral").innerText = `S/. ${totalG.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            document.getElementById("subtotalAbarrotes").innerText = `S/. ${subAbarrotes.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            document.getElementById("subtotalLimpieza").innerText = `S/. ${subLimpieza.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
-            document.getElementById("itemsCount").innerText = inventario.length;
-            
+            // Actualizar paneles estadísticos
+            document.getElementById("totalInventario").innerText = `S/. ${sumaTotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById("cantidadItems").innerText = inventario.length;
             lucide.createIcons();
         }
 
-        // AGREGAR ARTÍCULO NUEVO
+        // 3. FORMULARIOS DE ACCIÓN (CRUD)
         async function crearProductoForm() {
             const { value: formValues } = await Swal.fire({
-                title: 'Añadir Producto',
-                background: '#0f172a',
-                color: '#f8fafc',
+                title: 'Nuevo Producto',
+                background: '#1e293b',
+                color: '#f1f5f9',
                 html: `
                     <div class="swal2-input-custom text-left">
-                        <label class="text-xs font-semibold text-slate-400">Código Único (Escanear/Escribir)</label>
-                        <input id="swal-codigo" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm">
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Categoría</label>
-                        <select id="swal-categoria" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm">
-                            <option value="Abarrotes">Abarrotes</option>
-                            <option value="Limpieza">Equipos de Limpieza</option>
-                        </select>
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Descripción</label>
-                        <input id="swal-descripcion" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm">
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Unidad de Medida (U.M.)</label>
-                        <input id="swal-unidad" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" placeholder="Ej: SACO, CAJA, UNIDAD">
+                        <label class="text-xs font-semibold text-slate-400">Código de Barras / ID</label>
+                        <input id="swal-codigo" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" placeholder="Ej: 050">
+                        <label class="text-xs font-semibold text-slate-400 mt-2">Descripción del Producto</label>
+                        <input id="swal-descripcion" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" placeholder="Nombre completo">
+                        <label class="text-xs font-semibold text-slate-400 mt-2">Unidad de Medida</label>
+                        <input id="swal-unidad" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" placeholder="SACO, KILOS, UNIDAD...">
                         <label class="text-xs font-semibold text-slate-400 mt-2">Fecha de Caducidad</label>
-                        <input id="swal-caducidad" type="date" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm">
+                        <input id="swal-caducidad" type="date" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2">
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <div>
-                                <label class="text-xs font-semibold text-slate-400">Cantidad Stock</label>
-                                <input id="swal-cantidad" type="number" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="0">
+                                <label class="text-xs font-semibold text-slate-400">Cantidad</label>
+                                <input id="swal-cantidad" type="number" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="0">
                             </div>
                             <div>
-                                <label class="text-xs font-semibold text-slate-400">Precio de Costo (S/.)</label>
-                                <input id="swal-precio" type="number" step="0.01" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="0.00">
+                                <label class="text-xs font-semibold text-slate-400">Precio Unitario (S/.)</label>
+                                <input id="swal-precio" type="number" step="0.01" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="0.00">
                             </div>
                         </div>
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'Registrar',
+                confirmButtonText: 'Añadir',
                 confirmButtonColor: '#4f46e5',
+                cancelButtonText: 'Cancelar',
                 preConfirm: () => {
                     const codigo = document.getElementById('swal-codigo').value.trim();
                     const descripcion = document.getElementById('swal-descripcion').value.trim();
-                    if(!codigo || !descripcion) { Swal.showValidationMessage('Código y descripción requeridos'); return false;}
-                    if(inventario.some(p => p.codigo === codigo)) { Swal.showValidationMessage('El código ya está en uso'); return false;}
+                    if (!codigo || !descripcion) {
+                        Swal.showValidationMessage('Código y Descripción son campos obligatorios');
+                        return false;
+                    }
+                    if (inventario.some(p => p.codigo === codigo)) {
+                        Swal.showValidationMessage('El código ingresado ya está asignado a otro ítem');
+                        return false;
+                    }
                     return {
                         codigo,
-                        categoria: document.getElementById('swal-categoria').value,
-                        descripcion: descripcion.toUpperCase(),
-                        unidad: document.getElementById('swal-unidad').value.trim().toUpperCase() || 'UNIDAD',
+                        descripcion,
+                        unidad: document.getElementById('swal-unidad').value.trim().toUpperCase() || 'UND',
                         caducidad: document.getElementById('swal-caducidad').value,
                         cantidad: parseInt(document.getElementById('swal-cantidad').value) || 0,
-                        precio: parseFloat(document.getElementById('swal-precio').value) || 0
+                        precio: parseFloat(document.getElementById('swal-precio').value) || 0.00
                     }
                 }
             });
 
-            if(formValues) {
+            if (formValues) {
                 inventario.push(formValues);
-                renderizarTodo();
-                Swal.fire('Guardado', 'Ficha creada con éxito', 'success');
+                renderizarInventario();
+                Swal.fire('Registrado', 'El producto ha sido ingresado al sistema.', 'success');
             }
         }
 
-        // VENTANA EDITABLE PARA MODIFICACIONES
         async function editarProductoForm(codigo) {
             const prod = inventario.find(p => p.codigo === codigo);
             if (!prod) return;
 
             const { value: formValues } = await Swal.fire({
-                title: 'Modificar Artículo',
-                background: '#0f172a',
-                color: '#f8fafc',
+                title: 'Editar Producto',
+                background: '#1e293b',
+                color: '#f1f5f9',
                 html: `
                     <div class="swal2-input-custom text-left">
-                        <label class="text-xs font-semibold text-slate-500">Código de Artículo</label>
-                        <input id="swal-codigo" class="swal2-input m-0 w-full bg-slate-950 border-slate-800 text-slate-500 rounded-lg p-2 text-sm cursor-not-allowed" value="${prod.codigo}" readonly>
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Categoría</label>
-                        <select id="swal-categoria" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm">
-                            <option value="Abarrotes" ${prod.categoria === 'Abarrotes' ? 'selected' : ''}>Abarrotes</option>
-                            <option value="Limpieza" ${prod.categoria === 'Limpieza' ? 'selected' : ''}>Equipos de Limpieza</option>
-                        </select>
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Descripción</label>
-                        <input id="swal-descripcion" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="${prod.descripcion}">
-                        <label class="text-xs font-semibold text-slate-400 mt-2">Unidad de Medida (U.M.)</label>
-                        <input id="swal-unidad" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="${prod.unidad}">
+                        <label class="text-xs font-semibold text-slate-500">Código (Invariable)</label>
+                        <input id="swal-codigo" class="swal2-input m-0 w-full bg-slate-950 border-slate-800 text-slate-500 rounded-lg p-2 cursor-not-allowed" value="${prod.codigo}" readonly>
+                        <label class="text-xs font-semibold text-slate-400 mt-2">Descripción del Producto</label>
+                        <input id="swal-descripcion" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="${prod.descripcion}">
+                        <label class="text-xs font-semibold text-slate-400 mt-2">Unidad de Medida</label>
+                        <input id="swal-unidad" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="${prod.unidad}">
                         <label class="text-xs font-semibold text-slate-400 mt-2">Fecha de Caducidad</label>
-                        <input id="swal-caducidad" type="date" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="${prod.caducidad}">
+                        <input id="swal-caducidad" type="date" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="${prod.caducidad}">
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <div>
-                                <label class="text-xs font-semibold text-slate-400">Cantidad / Stock</label>
-                                <input id="swal-cantidad" type="number" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="${prod.cantidad}">
+                                <label class="text-xs font-semibold text-slate-400">Cantidad</label>
+                                <input id="swal-cantidad" type="number" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="${prod.cantidad}">
                             </div>
                             <div>
                                 <label class="text-xs font-semibold text-slate-400">Precio Unitario (S/.)</label>
-                                <input id="swal-precio" type="number" step="0.01" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2 text-sm" value="${prod.precio}">
+                                <input id="swal-precio" type="number" step="0.01" class="swal2-input m-0 w-full bg-slate-900 border-slate-700 text-white rounded-lg p-2" value="${prod.precio}">
                             </div>
                         </div>
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'Guardar Cambios',
+                confirmButtonText: 'Actualizar',
                 confirmButtonColor: '#4f46e5',
+                cancelButtonText: 'Cancelar',
                 preConfirm: () => {
                     return {
                         codigo: prod.codigo,
-                        categoria: document.getElementById('swal-categoria').value,
-                        descripcion: document.getElementById('swal-descripcion').value.trim().toUpperCase(),
+                        descripcion: document.getElementById('swal-descripcion').value.trim(),
                         unidad: document.getElementById('swal-unidad').value.trim().toUpperCase(),
                         caducidad: document.getElementById('swal-caducidad').value,
                         cantidad: parseInt(document.getElementById('swal-cantidad').value) || 0,
-                        precio: parseFloat(document.getElementById('swal-precio').value) || 0
+                        precio: parseFloat(document.getElementById('swal-precio').value) || 0.00
                     }
                 }
             });
@@ -369,114 +274,131 @@
             if (formValues) {
                 const index = inventario.findIndex(p => p.codigo === codigo);
                 inventario[index] = formValues;
-                renderizarTodo();
-                
-                // Efecto visual de parpadeo para ubicar los cambios hechos
-                const r = document.getElementById(`row-${codigo}`);
-                if(r) {
-                    r.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    r.classList.add('bg-emerald-500/20');
-                    setTimeout(() => r.classList.remove('bg-emerald-500/20'), 2000);
-                }
+                renderizarInventario();
+                Swal.fire('Modificado', 'Los datos del artículo fueron actualizados.', 'success');
             }
         }
 
-        // ELIMINAR ITEM
         function eliminarProducto(codigo) {
             Swal.fire({
-                title: '¿Eliminar Artículo?',
-                text: "Esto restará los montos totales asignados.",
+                title: '¿Retirar del inventario?',
+                text: "Esta acción no se puede deshacer.",
                 icon: 'warning',
-                background: '#0f172a',
-                color: '#f8fafc',
+                background: '#1e293b',
+                color: '#f1f5f9',
                 showCancelButton: true,
                 confirmButtonColor: '#f43f5e',
                 cancelButtonColor: '#475569',
-                confirmButtonText: 'Eliminar permanentemente'
+                confirmButtonText: 'Sí, borrar',
+                cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     inventario = inventario.filter(p => p.codigo !== codigo);
-                    renderizarTodo();
+                    renderizarInventario();
+                    Swal.fire('Eliminado', 'Producto removido.', 'success');
                 }
             });
         }
 
-        // APARTADO LOGÍSTICO QR (CAMARA TRASERA)
+        // 4. LECTOR DE CÓDIGOS QR
         function toggleCamara() {
             const placeholder = document.getElementById('placeholder-camara');
             const btn = document.getElementById('btn-camara');
 
             if (!esEscaneando) {
                 html5QrcodeScanner = new Html5Qrcode("reader");
+                const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
                 html5QrcodeScanner.start(
                     { facingMode: "environment" }, 
-                    { fps: 12, qrbox: { width: 220, height: 220 } },
-                    (text) => {
-                        procesarLecturaQR(text);
+                    config,
+                    (decodedText) => {
+                        procesarEscaneoQR(decodedText);
                     },
-                    () => {}
+                    (error) => { /* Escaneo pasivo fallido */ }
                 ).then(() => {
                     esEscaneando = true;
                     placeholder.classList.add('hidden');
-                    btn.className = "mt-4 w-full bg-rose-600 hover:bg-rose-500 text-white py-2.5 px-4 rounded-xl text-xs font-bold tracking-wider uppercase transition flex items-center justify-center gap-2 cursor-pointer border border-rose-500";
-                    btn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i><span>Apagar Cámara</span>`;
+                    btn.className = "mt-4 w-full bg-rose-600 hover:bg-rose-500 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer border border-rose-500";
+                    btn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i><span>Apagar Lector</span>`;
                     lucide.createIcons();
-                }).catch(() => {
-                    Swal.fire('Dispositivo', 'Habilita accesos de cámara o revisa si tu conexión cuenta con HTTPS.', 'error');
+                }).catch(err => {
+                    Swal.fire('Cámara', 'Asegúrate de conceder permisos y navegar desde un sitio seguro (HTTPS).', 'error');
                 });
             } else {
                 html5QrcodeScanner.stop().then(() => {
                     esEscaneando = false;
                     placeholder.classList.remove('hidden');
-                    btn.className = "mt-4 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-xl text-xs font-bold tracking-wider uppercase transition flex items-center justify-center gap-2 cursor-pointer border border-indigo-500/40";
-                    btn.innerHTML = `<i data-lucide="camera" class="w-4 h-4"></i><span>Encender Cámara</span>`;
+                    btn.className = "mt-4 w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer border border-slate-700";
+                    btn.innerHTML = `<i data-lucide="camera" class="w-4 h-4"></i><span>Activar Lector</span>`;
                     lucide.createIcons();
                 });
             }
         }
 
-        function procesarLecturaQR(codigo) {
-            const clean = codigo.trim();
-            const prod = inventario.find(p => p.codigo === clean);
+        function procesarEscaneoQR(codigoLeido) {
+            const cleanCode = codigoLeido.trim();
+            const prod = inventario.find(p => p.codigo === cleanCode);
 
             if (prod) {
                 if (navigator.vibrate) navigator.vibrate(100);
-                // Cerrará / detendrá el scanner si se requiere editar de inmediato sin interrupciones
-                editarProductoForm(clean);
+                
+                // Resaltar fila temporalmente en la tabla
+                const fila = document.getElementById(`prod-row-${cleanCode}`);
+                if (fila) {
+                    fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    fila.classList.add('bg-indigo-600/30');
+                    setTimeout(() => fila.classList.remove('bg-indigo-600/30'), 3000);
+                }
+
+                // Abrir edición del producto automáticamente
+                editarProductoForm(cleanCode);
             } else {
                 Swal.fire({
-                    title: 'Código Nuevo detectado',
-                    text: `El código "${clean}" no está listado. ¿Deseas ingresarlo en este momento?`,
+                    title: 'Código desconocido',
+                    text: `El código "${cleanCode}" no está en el inventario. ¿Deseas crearlo ahora?`,
                     icon: 'question',
-                    background: '#0f172a',
-                    color: '#f8fafc',
+                    background: '#1e293b',
+                    color: '#f1f5f9',
                     showCancelButton: true,
-                    confirmButtonText: 'Crear Item'
-                }).then(res => {
-                    if (res.isConfirmed) {
+                    confirmButtonText: 'Crear',
+                    cancelButtonText: 'Omitir'
+                }).then((r) => {
+                    if (r.isConfirmed) {
                         crearProductoForm();
+                        // Pre-rellenar el código en el input si se abre de inmediato
                         setTimeout(() => {
-                            const input = document.getElementById('swal-codigo');
-                            if(input) input.value = clean;
+                            const inputCod = document.getElementById('swal-codigo');
+                            if(inputCod) inputCod.value = cleanCode;
                         }, 400);
                     }
                 });
             }
         }
 
-        // RESPALDO DE SEGURIDAD (.JS)
+        // 5. EXPORTAR COPIA DE SEGURIDAD (.JS)
         function exportarBackup() {
-            const backup = {
-                empresa: "MULTISERVICIOS ALFRE",
-                fecha: new Date().toISOString(),
-                inventario
+            const dataBackup = {
+                almacen: "MULTISERVICIOS ALFRE",
+                fechaExportacion: new Date().toISOString(),
+                inventario: inventario
             };
-            const str = `// Respaldo de Almacén Alfre\nconst dataAlmacen = ${JSON.stringify(backup, null, 4)};`;
-            const blob = new Blob([str], { type: "application/javascript;charset=utf-8;" });
+
+            const contenidoArchivo = `// Backup de Sistema de Almacén\nconst backupInventario = ${JSON.stringify(dataBackup, null, 4)};\nconsole.log("Copia de inventario cargada.");`;
+            
+            const blob = new Blob([contenidoArchivo], { type: "application/javascript;charset=utf-8;" });
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `inventario_alfre_${new Date().toISOString().split('T')[0]}.js`;
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `backup_inventario_${new Date().toISOString().split('T')[0]}.js`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            
+            Swal.fire('Backup generado', 'El archivo JS se descargó correctamente.', 'success');
         }
     </script>
 </body>
